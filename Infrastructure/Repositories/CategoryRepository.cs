@@ -51,12 +51,13 @@ public class CategoryRepository(AppDBContext _context) : ICategoryRepository
 
         updatedCategory.Adapt(category);
         category.Id = id;
+        category.UpdatedDate = DateTime.UtcNow;
 
-        //// Если есть изображение
-        //if (updatedCategory.Image != null)
-        //{
-        //    category.Image = updatedCategory.Image;
-        //}
+        // Если есть изображение
+        if (updatedCategory.Image != null)
+        {
+            category.Image = updatedCategory.Image;
+        }
 
         await _context.SaveChangesAsync(cancellationToken);
         return category;
@@ -64,15 +65,22 @@ public class CategoryRepository(AppDBContext _context) : ICategoryRepository
 
     public async Task<bool> DeleteCategory(Guid userId, Guid id, CancellationToken cancellationToken = default)
     {
-        var category = await _context.Categories.FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
+        // var category = await _context.Categories.FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
+        //if (category == null)
+        //    return false;
+        //_context.Categories.Remove(category);
 
-        if (category == null)
+        var userCategory = await _context.UserCategories
+            .FirstOrDefaultAsync(uc => uc.UserId == userId && uc.CategoryId == id, cancellationToken);
+
+       if (userCategory == null || !userCategory.IsActive)
             return false;
-        
-        _context.Categories.Remove(category);
-        await _context.SaveChangesAsync(cancellationToken);
 
-        return true;
+       userCategory.IsActive = false;
+       
+       await _context.SaveChangesAsync(cancellationToken);
+
+       return true;
     }
 
 }

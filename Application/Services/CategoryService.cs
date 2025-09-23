@@ -7,7 +7,11 @@ using Mapster;
 
 namespace Application.Services;
 
-public class CategoryService(ICategoryRepository _categoryRepository, IUserCategoryRepository _userCategoryRepository) : ICategoryService
+public class CategoryService(
+        ICategoryRepository _categoryRepository, 
+        IUserCategoryRepository _userCategoryRepository, 
+        IFileService _fileService
+    ) : ICategoryService
 {
     public async Task<ApiResponse<IEnumerable<CategoryDto>>> GetCategories(Guid userId, CancellationToken cancellationToken)
     {
@@ -58,6 +62,11 @@ public class CategoryService(ICategoryRepository _categoryRepository, IUserCateg
     {
         try
         {
+            if (categoryDto == null)
+                return new ApiResponse<CategoryDto>(400, "Данные категории не предоставлены!");
+            if(userId == Guid.Empty)
+                return new ApiResponse<CategoryDto>(400, "Id пользователя не может быть пустым!");
+
             // Проверяем, существует ли уже такая категория
             var existingCategory = await _categoryRepository.GetCategoryByNameAndTypeAsync(
                 categoryDto.Name ?? "", categoryDto.Type, cancellationToken);
@@ -81,7 +90,26 @@ public class CategoryService(ICategoryRepository _categoryRepository, IUserCateg
 
             // Создаем новую категорию
             var category = categoryDto.Adapt<Category>();
+
+
+            if (categoryDto.ImageURL != null)
+            {
+                var savedFile = await _fileService.SaveAsync(categoryDto.ImageURL);
+                if (savedFile == null)
+                    return new ApiResponse<CategoryDto>(400, "Ошибка при сохранении файла изображения пользователя.");
+                category.Image = new CategoryFile()
+                {
+                    CategoryId = category.Id,
+                    Name = savedFile.Name,
+                    Url = savedFile.Url,
+                    Size = savedFile.Size,
+                    Extension = savedFile.Extension
+                };
+            }
+
             var createdCategory = await _categoryRepository.CreateCategory(userId, category, cancellationToken);
+            if (createdCategory == null)
+                return new ApiResponse<CategoryDto>(500, null, "Ошибка при создании категории");
 
             // Связываем категорию с пользователем
             await _userCategoryRepository.AddOrActivateUserCategoryAsync(userId, createdCategory.Id, cancellationToken);
