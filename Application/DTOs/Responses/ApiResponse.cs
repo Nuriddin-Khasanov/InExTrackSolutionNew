@@ -1,4 +1,4 @@
-﻿namespace InExTrack.Application.DTOs.Responses
+﻿namespace Application.DTOs.Responses
 {
     public class ApiResponse<T>
     {

@@ -1,4 +1,4 @@
-﻿namespace InExTrack.Domain.Enums
+﻿namespace Domain.Enums
 {
     public enum CategoryTypeEnum
     {

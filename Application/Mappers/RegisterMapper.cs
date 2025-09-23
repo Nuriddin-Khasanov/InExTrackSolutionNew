@@ -1,26 +1,25 @@
-﻿using InExTrack.Application.DTOs;
-using InExTrack.Application.DTOs.Requests;
-using InExTrack.Application.DTOs.Responses;
-using InExTrack.Domain.Models;
+﻿using Application.DTOs;
+using Application.DTOs.Requests;
+using Application.DTOs.Responses;
+using Domain.Models;
 using Mapster;
 
-namespace InExTrack.Application.Mappers
+namespace Application.Mappers;
+
+public class RegisterMapper : IRegister
 {
-    public class RegisterMapper : IRegister
+    public void Register(TypeAdapterConfig config)
     {
-        public void Register(TypeAdapterConfig config)
-        {
-            config.NewConfig<User, UserRequestsDto>();
-            config.NewConfig<UserRequestsDto, User>();
+        config.NewConfig<User, UserRequestsDto>();
+        config.NewConfig<UserRequestsDto, User>();
 
-            config.NewConfig<User, UserResponseDto>();
-            config.NewConfig<UserResponseDto, User>();
+        config.NewConfig<User, UserResponseDto>();
+        config.NewConfig<UserResponseDto, User>();
 
-            config.NewConfig<Category, CategoryDto>();
-            config.NewConfig<CategoryDto, Category>();
+        config.NewConfig<Category, CategoryDto>();
+        config.NewConfig<CategoryDto, Category>();
 
-            config.NewConfig<UserCategory, UserCategoryDto>();
-            config.NewConfig<UserCategoryDto, UserCategory>();
-        }
+        config.NewConfig<UserCategory, UserCategoryDto>();
+        config.NewConfig<UserCategoryDto, UserCategory>();
     }
 }

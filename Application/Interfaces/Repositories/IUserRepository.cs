@@ -1,7 +1,7 @@
-﻿using InExTrack.Application.DTOs.Requests;
-using InExTrack.Domain.Models;
+﻿using Application.DTOs.Requests;
+using Domain.Models;
 
-namespace InExTrack.Application.Interfaces.Repositories;
+namespace Application.Interfaces.Repositories;
 
 public interface IUserRepository
 {

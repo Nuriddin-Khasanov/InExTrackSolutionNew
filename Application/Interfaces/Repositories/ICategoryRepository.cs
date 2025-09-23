@@ -1,7 +1,7 @@
-﻿using InExTrack.Domain.Enums;
-using InExTrack.Domain.Models;
+﻿using Domain.Enums;
+using Domain.Models;
 
-namespace InExTrack.Application.Interfaces.Repositories
+namespace Application.Interfaces.Repositories
 {
     public interface ICategoryRepository
     {

@@ -1,9 +1,9 @@
-﻿using InExTrack.Domain.Commons;
+﻿using Domain.Commons;
 
-namespace InExTrack.Domain.Models
+namespace Domain.Models;
+
+public class UserFile: DataFile
 {
-    public class UserFile: DataFile
-    {
-        public required Guid UserId { get; set; }
-    }
+    public required Guid UserId { get; set; }
+    public User? User { get; set; }
 }

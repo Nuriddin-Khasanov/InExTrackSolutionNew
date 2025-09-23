@@ -1,13 +1,12 @@
-﻿using InExTrack.Domain.Commons;
+﻿using Domain.Commons;
 
-namespace InExTrack.Domain.Models
+namespace Domain.Models;
+
+public class Transaction_ : Entity
 {
-    public class Transaction_ : Entity
-    {
-        public Guid UserCategoryId { get; set; }
-        public decimal Amount { get; set; }
-        public string? Note { get; set; }
+    public Guid UserCategoryId { get; set; }
+    public decimal Amount { get; set; }
+    public string? Note { get; set; }
 
-        public required List<UserCategory> UserCategories { get; set; }
-    }
+    public required List<UserCategory> UserCategories { get; set; }
 }

@@ -1,9 +1,8 @@
-﻿using InExTrack.Domain.Models;
+﻿using Domain.Models;
 
-namespace InExTrack.Application.Interfaces.Services
+namespace Application.Interfaces.Services;
+
+public interface IJWTService
 {
-    public interface IJWTService
-    {
-        string GenerateToken(User user);
-    }
+    string GenerateToken(User user);
 }

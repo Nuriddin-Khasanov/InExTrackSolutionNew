@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace InExTrack.Application.DTOs.Requests
+namespace Application.DTOs.Requests
 {
     public class LoginRequest_
     {

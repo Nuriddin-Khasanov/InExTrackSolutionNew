@@ -1,9 +1,8 @@
-﻿using InExTrack.Domain.Commons;
+﻿using Domain.Commons;
 
-namespace InExTrack.Domain.Models
+namespace Domain.Models;
+
+public class CategoryFile : DataFile
 {
-    public class CategoryFile : DataFile
-    {
-        public Guid CategoryId { get; set; }
-    }
+    public Guid CategoryId { get; set; }
 }

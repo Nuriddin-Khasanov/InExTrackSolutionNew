@@ -1,6 +1,6 @@
-﻿using InExTrack.Application.DTOs.Responses;
+﻿using Application.DTOs.Responses;
 
-namespace InExTrack.Application.DTOs
+namespace Application.DTOs
 {
     public class AuthResultDto
     {

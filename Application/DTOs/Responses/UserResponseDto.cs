@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 
-namespace InExTrack.Application.DTOs.Responses
+namespace Application.DTOs.Responses
 {
     public class UserResponseDto
     {
@@ -12,6 +12,6 @@ namespace InExTrack.Application.DTOs.Responses
 
         public required string PhoneNumber { get; set; }
 
-        public IFormFile? ImageURL { get; set; }
+        public string? ImageURL { get; set; }
     }
 }

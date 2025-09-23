@@ -1,4 +1,4 @@
-﻿namespace InExTrack.Application.DTOs
+﻿namespace Application.DTOs
 {
     public class UserCategoryDto
     {

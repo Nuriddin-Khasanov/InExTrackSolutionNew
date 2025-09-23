@@ -1,13 +1,12 @@
-﻿using InExTrack.Application.DTOs;
-using InExTrack.Application.DTOs.Requests;
-using InExTrack.Application.DTOs.Responses;
-using InExTrack.Application.Interfaces.Repositories;
-using InExTrack.Application.Interfaces.Services;
-using InExTrack.Domain.Models;
+﻿using Application.DTOs;
+using Application.DTOs.Requests;
+using Application.DTOs.Responses;
+using Application.Interfaces.Repositories;
+using Application.Interfaces.Services;
+using Domain.Models;
 using Mapster;
-using Microsoft.AspNetCore.Mvc;
 
-namespace InExTrack.Application.Services;
+namespace Application.Services;
 
 public class UserService(IUserRepository _userRepository, IJWTService _jwtService, IFileService _fileService) : IUserService
 {

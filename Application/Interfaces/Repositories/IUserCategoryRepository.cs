@@ -1,7 +1,7 @@
-﻿using InExTrack.Application.DTOs;
-using InExTrack.Domain.Models;
+﻿using Application.DTOs;
+using Domain.Models;
 
-namespace InExTrack.Application.Interfaces.Repositories
+namespace Application.Interfaces.Repositories
 {
     public interface IUserCategoryRepository
     {

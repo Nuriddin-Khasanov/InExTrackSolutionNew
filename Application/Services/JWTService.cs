@@ -1,12 +1,12 @@
-﻿using InExTrack.Application.Interfaces.Services;
-using InExTrack.Domain.Models;
+﻿using Application.Interfaces.Services;
+using Domain.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace InExTrack.Application.Services;
+namespace Application.Services;
 
 public class JwtService(IConfiguration _configuration) : IJWTService
 {
@@ -14,8 +14,8 @@ public class JwtService(IConfiguration _configuration) : IJWTService
     {
         var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new Claim(ClaimTypes.Name, user.UserName)
+            new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new(ClaimTypes.Name, user.UserName)
         };
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));

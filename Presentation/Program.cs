@@ -3,12 +3,12 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
-using InExTrack.Application.Interfaces.Repositories;
-using InExTrack.Application.Interfaces.Services;
-using InExTrack.Application.Services;
-using InExTrack.Infrastructure.DataContext;
-using InExTrack.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Application.Interfaces.Repositories;
+using Application.Interfaces.Services;
+using Application.Services;
+using Infrastructure.DataContext;
+using Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -38,10 +38,8 @@ builder.Services.AddAuthentication(
         };
     });
 
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("AdminPolicy", policy => policy.RequireRole("Admin"));
-});
+builder.Services.AddAuthorizationBuilder()
+    .AddPolicy("AdminPolicy", policy => policy.RequireRole("Admin"));
 
 builder.Services.AddScoped<IJWTService, JwtService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();

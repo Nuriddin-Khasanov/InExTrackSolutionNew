@@ -1,8 +1,8 @@
-﻿using InExTrack.Application.DTOs;
-using InExTrack.Application.DTOs.Requests;
-using InExTrack.Application.DTOs.Responses;
+﻿using Application.DTOs;
+using Application.DTOs.Requests;
+using Application.DTOs.Responses;
 
-namespace InExTrack.Application.Interfaces.Services;
+namespace Application.Interfaces.Services;
 
 public interface IUserService
 {

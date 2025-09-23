@@ -1,7 +1,7 @@
-﻿using InExTrack.Domain.Commons;
-using InExTrack.Domain.Enums;
+﻿using Domain.Commons;
+using Domain.Enums;
 
-namespace InExTrack.Domain.Models;
+namespace Domain.Models;
 
 public class Category : Entity
 {

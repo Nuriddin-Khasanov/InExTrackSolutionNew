@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Http;
 
-namespace InExTrack.Application.DTOs.Requests
+namespace Application.DTOs.Requests
 {
     public class UserRequestsDto
     {

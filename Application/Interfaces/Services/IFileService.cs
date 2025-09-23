@@ -1,11 +1,10 @@
-﻿using InExTrack.Application.DTOs;
+﻿using Application.DTOs;
 using Microsoft.AspNetCore.Http;
 
-namespace InExTrack.Application.Interfaces.Services
+namespace Application.Interfaces.Services;
+
+public interface IFileService
 {
-    public interface IFileService
-    {
-        Task RemoveAsync(string fileName);
-        Task<FileDto> SaveAsync(IFormFile file);
-    }
+    Task RemoveAsync(string fileName);
+    Task<FileDto> SaveAsync(IFormFile file);
 }

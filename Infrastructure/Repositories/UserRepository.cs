@@ -1,25 +1,21 @@
-﻿using InExTrack.Application.DTOs.Requests;
-using InExTrack.Application.Interfaces.Repositories;
-using InExTrack.Domain.Models;
-using InExTrack.Infrastructure.DataContext;
+﻿using Application.DTOs.Requests;
+using Application.Interfaces.Repositories;
+using Domain.Models;
+using Infrastructure.DataContext;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 
-namespace InExTrack.Infrastructure.Repositories;
+namespace Infrastructure.Repositories;
 
 public class UserRepository(AppDBContext _context) : IUserRepository
 {
-
-    //public async Task<List<User>> GetAllAsync(CancellationToken cancellationToken = default)
-    //{
-    //    return await _context.Users.ToListAsync(cancellationToken);
-    //}
-
     public async Task<User?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var newUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
+        var user = await _context.Users
+        .Include(x => x.Image)
+        .FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
 
-        return newUser;
+        return user;
     }
 
     public async Task<User?> GetByUsernameAsync(string username, CancellationToken cancellationToken = default)

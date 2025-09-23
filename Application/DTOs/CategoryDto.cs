@@ -1,7 +1,7 @@
-﻿using InExTrack.Domain.Enums;
+﻿using Domain.Enums;
 using Microsoft.AspNetCore.Http;
 
-namespace InExTrack.Application.DTOs
+namespace Application.DTOs
 {
     public class CategoryDto
     {
