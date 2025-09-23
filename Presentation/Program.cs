@@ -1,22 +1,31 @@
 
+using System.Reflection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
 using InExTrack.Application.Interfaces.Repositories;
 using InExTrack.Application.Interfaces.Services;
+using InExTrack.Application.Mappers;
 using InExTrack.Application.Services;
 using InExTrack.Infrastructure.DataContext;
 using InExTrack.Infrastructure.Repositories;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+var config = TypeAdapterConfig.GlobalSettings;
+config.Scan(Assembly.GetExecutingAssembly());
+
+builder.Services.AddMapster();
+new RegisterMapper().Register(config);
 
 // Add services to the container.
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
+
 builder.Services.AddDbContext<AppDBContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddAuthentication(

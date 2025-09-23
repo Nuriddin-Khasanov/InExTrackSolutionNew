@@ -38,13 +38,14 @@ public class UserService(IUserRepository _userRepository, IJWTService _jwtServic
         if (_userId == Guid.Empty)
             return new ApiResponse<UserResponseDto>(400, "Некорректный идентификатор пользователя.");
 
-        var user = (await _userRepository.GetByIdAsync(_userId, cancellationToken)).Adapt<UserResponseDto>();
+        var user = await _userRepository.GetByIdAsync(_userId, cancellationToken);
+        var userDto = user.Adapt<UserResponseDto>();
         // .ContinueWith(t => t.Result.Adapt<UserResponseDto>(), cancellationToken);
 
         if (user == null)
             return new ApiResponse<UserResponseDto>(404, "Пользователь не найден!");
 
-        return new ApiResponse<UserResponseDto>(200, user, "Пользователь успешно получен!");
+        return new ApiResponse<UserResponseDto>(200, userDto, "Пользователь успешно получен!");
     }
 
     public async Task<ApiResponse<bool>> RegisterUserAsync(UserRequestsDto _user, CancellationToken cancellationToken)

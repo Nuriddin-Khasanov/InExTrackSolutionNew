@@ -17,14 +17,18 @@ public class UserRepository(AppDBContext _context) : IUserRepository
 
     public async Task<User?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var newUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
+        var newUser = await _context.Users
+            .Include(x=>x.Image)
+            .FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
 
         return newUser;
     }
 
     public async Task<User?> GetByUsernameAsync(string username, CancellationToken cancellationToken = default)
     {
-        return await _context.Users.FirstOrDefaultAsync(u => u.UserName == username, cancellationToken);
+        return await _context.Users
+            .Include(x=>x.Image)
+            .FirstOrDefaultAsync(u => u.UserName == username, cancellationToken);
     }
 
     public async Task AddAsync(User user)

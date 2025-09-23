@@ -13,7 +13,9 @@ namespace InExTrack.Application.Mappers
             config.NewConfig<User, UserRequestsDto>();
             config.NewConfig<UserRequestsDto, User>();
 
-            config.NewConfig<User, UserResponseDto>();
+            config.NewConfig<User, UserResponseDto>()
+                .Map(dest => dest.ImageURL, 
+                    src => src.Image.Url);
             config.NewConfig<UserResponseDto, User>();
 
             config.NewConfig<Category, CategoryDto>();

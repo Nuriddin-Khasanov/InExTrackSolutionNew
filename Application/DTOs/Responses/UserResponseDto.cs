@@ -12,6 +12,6 @@ namespace InExTrack.Application.DTOs.Responses
 
         public required string PhoneNumber { get; set; }
 
-        public IFormFile? ImageURL { get; set; }
+        public string? ImageURL { get; set; }
     }
 }
