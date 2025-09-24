@@ -12,24 +12,32 @@ public class CategoryRepository(AppDBContext _context) : ICategoryRepository
     public async Task<bool> CategoryExistsAsync(string name, CategoryTypeEnum type, CancellationToken cancellationToken = default)
     {
         return await _context.Categories
+            .Include(c => c.UserCategories)
+            .Include(c => c.Image)
             .AnyAsync(c => c.Name == name && c.Type == type, cancellationToken);
     }
 
     public async Task<Category?> GetCategoryByNameAndTypeAsync(string name, CategoryTypeEnum type, CancellationToken cancellationToken = default)
     {
         return await _context.Categories
+            .Include(c => c.UserCategories)
+            .Include(c => c.Image)
             .FirstOrDefaultAsync(c => c.Name == name && c.Type == type, cancellationToken);
     }
+
     public async Task<List<Category>> GetUserCategoriesAsync(Guid userId, CancellationToken cancellationToken = default)
     {
         return await _context.Categories
+            .Include(c => c.Image)
             .Where(c => c.UserCategories.Any(uc => uc.UserId == userId && uc.IsActive))
             .ToListAsync(cancellationToken);
     }
 
     public async Task<Category?> GetCategoryById(Guid userId, Guid id, CancellationToken cancellationToken = default)
     {
-        var category = await _context.Categories.FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
+        var category = await _context.Categories
+            .Include(c => c.Image)
+            .FirstOrDefaultAsync(c => c.Id == id && c.UserCategories.Any(uc => uc.UserId == userId && uc.IsActive), cancellationToken);
 
         return category;
     }
@@ -44,7 +52,10 @@ public class CategoryRepository(AppDBContext _context) : ICategoryRepository
 
     public async Task<Category?> UpdateCategory(Guid userId, Guid id, Category updatedCategory, CancellationToken cancellationToken = default)
     {
-        var category = await _context.Categories.FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
+        var category = await _context.Categories
+            .Include(c => c.UserCategories)
+            .Include(c => c.Image)
+            .FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
 
         if (category == null)
             return null;

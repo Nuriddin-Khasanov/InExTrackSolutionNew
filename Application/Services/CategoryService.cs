@@ -17,9 +17,12 @@ public class CategoryService(
     {
         try
         {
+            if (userId == Guid.Empty)
+                throw new ArgumentNullException(nameof(userId));
+
             var categories = await _categoryRepository.GetUserCategoriesAsync(userId, cancellationToken);
 
-            if (categories == null || !categories.Any())
+            if (categories == null || categories.Count == 0)
                 return new ApiResponse<IEnumerable<CategoryDto>>(404, "Категории не найдены");
 
             var categoriesDto = categories.Adapt<IEnumerable<CategoryDto>>();

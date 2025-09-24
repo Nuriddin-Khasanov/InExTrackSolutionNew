@@ -14,7 +14,7 @@ public class CategoryController(ICategoryService _categoryService) : ApiBaseCont
     public async Task<IActionResult> GetCategories(CancellationToken cancellationToken)
     {
         var userId = GetUserId();
-        var categories = await _categoryService.GetCategories(GetUserId(), cancellationToken);
+        var categories = await _categoryService.GetCategories(userId, cancellationToken);
         return Ok(categories);
     }
 

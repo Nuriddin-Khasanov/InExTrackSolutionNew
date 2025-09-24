@@ -1,4 +1,4 @@
-
+using System.Reflection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -9,14 +9,22 @@ using Application.Interfaces.Services;
 using Application.Services;
 using Infrastructure.DataContext;
 using Infrastructure.Repositories;
+using Mapster;
+using Application.Mappers;
 
 var builder = WebApplication.CreateBuilder(args);
+var config = TypeAdapterConfig.GlobalSettings;
+config.Scan(Assembly.GetExecutingAssembly());
+
+builder.Services.AddMapster();
+new RegisterMapper().Register(config);
 
 // Add services to the container.
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
+
 builder.Services.AddDbContext<AppDBContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddAuthentication(
@@ -30,8 +38,8 @@ builder.Services.AddAuthentication(
     {
         options.TokenValidationParameters = new TokenValidationParameters
         {
-            ValidateIssuer = false,   // ��������� �������� Issuer
-            ValidateAudience = false, // ��������� �������� Audience
+            ValidateIssuer = false,   // Issuer
+            ValidateAudience = false, // Audience
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
