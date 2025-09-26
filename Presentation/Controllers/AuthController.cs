@@ -42,7 +42,7 @@ public class AuthController(IUserService _userService) : ApiBaseController
 
         return Ok(result);
     }
-
+    
     [Authorize]
     [HttpPut]
     public async Task<IActionResult> UpdateUser([FromForm] UserRequestsDto userDto, CancellationToken cancellationToken)

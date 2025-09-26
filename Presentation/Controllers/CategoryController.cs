@@ -1,4 +1,4 @@
-﻿using Application.DTOs;
+﻿using Application.DTOs.Requests;
 using Application.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -25,13 +25,13 @@ public class CategoryController(ICategoryService _categoryService) : ApiBaseCont
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateCategory([FromForm] CategoryDto categoryDto, CancellationToken cancellationToken)
+    public async Task<IActionResult> CreateCategory([FromForm] CategoryRequestDto categoryDto, CancellationToken cancellationToken)
     {
         return Ok(await _categoryService.CreateCategory(GetUserId(), categoryDto, cancellationToken));
     }
 
-    [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateCategory([FromBody] Guid id, CategoryDto updatedCategory, CancellationToken cancellationToken)
+    [HttpPut]
+    public async Task<IActionResult> UpdateCategory([FromForm] Guid id, CategoryRequestDto updatedCategory, CancellationToken cancellationToken)
     {
         return Ok(await _categoryService.UpdateCategory(GetUserId(), id, updatedCategory, cancellationToken));
     }

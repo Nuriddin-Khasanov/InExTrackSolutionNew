@@ -1,16 +1,20 @@
-using System.Reflection;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
-using System.Text;
-using Microsoft.EntityFrameworkCore;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
+using Application.Mappers;
 using Application.Services;
 using Infrastructure.DataContext;
 using Infrastructure.Repositories;
 using Mapster;
-using Application.Mappers;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Any;
+using Microsoft.OpenApi.Models;
+using Presentation.Middlewares;
+using Swashbuckle.AspNetCore.SwaggerGen;
+using System.Reflection;
+using System.Text;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 var config = TypeAdapterConfig.GlobalSettings;
@@ -21,7 +25,33 @@ new RegisterMapper().Register(config);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
+
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
+    c.UseAllOfForInheritance();
+    c.UseOneOfForPolymorphism();
+
+    // Чтобы enum в Swagger UI показывались строками
+    /*
+    c.SchemaGeneratorOptions = new SchemaGeneratorOptions
+    {
+        DescribeAllEnumsAsStrings = true
+    };
+    */
+    // Вместо этого, чтобы отображать enum как строки в Swagger, используйте следующий фильтр:
+    c.MapType<Enum>(() => new OpenApiSchema
+    {
+        Type = "string",
+        Enum = Enum.GetNames(typeof(Enum)).Select(n => new OpenApiString(n)).ToList<IOpenApiAny>()
+    });
+});
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 
@@ -104,7 +134,7 @@ if (app.Environment.IsDevelopment())
     });
 }
 app.UseFileServer();
-
+app.UseMiddleware<CustomExceptionMiddleware>();
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();

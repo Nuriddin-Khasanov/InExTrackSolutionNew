@@ -27,5 +27,9 @@ public class AppDBContext: DbContext
         .WithOne(f => f.User)
         .HasForeignKey<UserFile>(f => f.UserId);
 
+        modelBuilder.Entity<Category>()
+       .Property(c => c.Type)
+       .HasConversion<int>(); // хранит как int (1 или 2)
+
     }
 }

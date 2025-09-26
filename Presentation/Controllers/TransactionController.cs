@@ -16,7 +16,7 @@ public class TransactionController(ITransactionService _transactionService) : Ap
         if (UserUid is null || UserUid.Value == Guid.Empty)
             return BadRequest("UserUid не определён.");
 
-        var transactions = await _transactionService.GetTransactionsAsync(UserUid, cancellationToken);
+        var transactions = await _transactionService.GetTransactionsAsync(UserUid.Value, cancellationToken);
         return Ok(transactions);
     }
 

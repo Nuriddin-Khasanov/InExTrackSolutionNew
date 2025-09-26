@@ -12,7 +12,18 @@ public class TransactionRepository(AppDBContext _context) : ITransactionReposito
 
     public async Task<IEnumerable<Transaction_>> GetTransactionsAsync(Guid? userId, CancellationToken cancellationToken = default)
     {
-        return await _context.Transactions.ToListAsync(cancellationToken);
+        return await _context.Transactions
+            .Where(t => t.UserCategories.Any(uc => uc.UserId == userId && uc.IsActive))
+            .ToListAsync(cancellationToken);
+
+        //return await _context.Transactions
+        //    .Where(t => t.UserCategory!.UserId == userId && t.UserCategory.IsActive)
+        //    .ToListAsync(cancellationToken);
+
+        //return await _context.Categories
+        //   .Include(c => c.Image)
+        //   .Where(c => c.UserCategories.Any(uc => uc.UserId == userId && uc.IsActive))
+        //   .ToListAsync(cancellationToken);
     }
 
     public async Task<Transaction_> GetTransactionByIdAsync(Guid transactionId, CancellationToken cancellationToken = default)

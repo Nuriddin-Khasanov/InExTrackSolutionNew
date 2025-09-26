@@ -31,13 +31,19 @@ public class UserRepository(AppDBContext _context) : IUserRepository
         await _context.SaveChangesAsync();
     }
 
-    public async Task<User?> UpdateAsync(Guid userId, UserRequestsDto userRequestsDto, CancellationToken cancellationToken = default)
+    public async Task<User?> UpdateAsync(Guid userId, User user_, CancellationToken cancellationToken = default)
     {
         User? user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId, cancellationToken);
         if (user == null)
-            return null; 
+            return null;
 
-        userRequestsDto.Adapt(user);
+        user.UserName = user_.UserName;
+        user.Email = user_.Email;
+        user.PhoneNumber = user_.PhoneNumber;
+        user.PasswordHash = user_.PasswordHash;
+        user.Image = user_.Image ?? user.Image;
+
+
         user.UpdatedDate = DateTime.UtcNow;
 
         await _context.SaveChangesAsync(cancellationToken);

@@ -13,15 +13,20 @@ public class RegisterMapper : IRegister
         config.NewConfig<User, UserRequestsDto>();
         config.NewConfig<UserRequestsDto, User>();
 
-            config.NewConfig<User, UserResponseDto>()
-                .Map(dest => dest.ImageURL, 
-                    src => src.Image.Url);
-            config.NewConfig<UserResponseDto, User>();
+        config.NewConfig<User, UserResponseDto>()
+            .Map(dest => dest.ImageURL, 
+                src => src.Image.Url);
+        config.NewConfig<UserResponseDto, User>();
 
-        config.NewConfig<Category, CategoryDto>();
-        config.NewConfig<CategoryDto, Category>();
+        config.NewConfig<Category, CategoryResponceDto>()
+            .Map(dest => dest.ImageURL,
+                src => src.Image.Url);
+        config.NewConfig<CategoryResponceDto, Category>();
+        config.NewConfig<Category, CategoryRequestDto>();
+        config.NewConfig<CategoryRequestDto, Category>();
 
         config.NewConfig<UserCategory, UserCategoryDto>();
         config.NewConfig<UserCategoryDto, UserCategory>();
+
     }
 }

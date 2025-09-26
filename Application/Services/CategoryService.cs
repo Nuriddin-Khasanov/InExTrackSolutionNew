@@ -1,4 +1,4 @@
-﻿using Application.DTOs;
+﻿using Application.DTOs.Requests;
 using Application.DTOs.Responses;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
@@ -13,7 +13,7 @@ public class CategoryService(
         IFileService _fileService
     ) : ICategoryService
 {
-    public async Task<ApiResponse<IEnumerable<CategoryDto>>> GetCategories(Guid userId, CancellationToken cancellationToken)
+    public async Task<ApiResponse<IEnumerable<CategoryResponceDto>>> GetCategories(Guid userId, CancellationToken cancellationToken)
     {
         try
         {
@@ -23,52 +23,52 @@ public class CategoryService(
             var categories = await _categoryRepository.GetUserCategoriesAsync(userId, cancellationToken);
 
             if (categories == null || categories.Count == 0)
-                return new ApiResponse<IEnumerable<CategoryDto>>(404, "Категории не найдены");
+                return new ApiResponse<IEnumerable<CategoryResponceDto>>(404, "Категории не найдены");
 
-            var categoriesDto = categories.Adapt<IEnumerable<CategoryDto>>();
+            var categoriesDto = categories.Adapt<IEnumerable<CategoryResponceDto>>();
 
-            return new ApiResponse<IEnumerable<CategoryDto>>(200, categoriesDto, "Категории успешно получены!");
+            return new ApiResponse<IEnumerable<CategoryResponceDto>>(200, categoriesDto, "Категории успешно получены!");
         }
         catch (Exception ex)
         {
-            return new ApiResponse<IEnumerable<CategoryDto>>(500, null, $"Ошибка при получении категорий: {ex.Message}");
+            return new ApiResponse<IEnumerable<CategoryResponceDto>>(500, null, $"Ошибка при получении категорий: {ex.Message}");
         }
     }
 
-    public async Task<ApiResponse<CategoryDto?>> GetCategoryById(Guid userId, Guid id, CancellationToken cancellationToken)
+    public async Task<ApiResponse<CategoryResponceDto?>> GetCategoryById(Guid userId, Guid id, CancellationToken cancellationToken)
     {
         try
         {
             if (id == Guid.Empty)
-                return new ApiResponse<CategoryDto?>(400, "Id не может быть пустым!");
+                return new ApiResponse<CategoryResponceDto?>(400, "Id не может быть пустым!");
 
             // Проверка доступа пользователя к категории
             var userCategory = await _userCategoryRepository.HasUserCategoryAsync(userId, id, cancellationToken);
             if (userCategory == null)
-                return new ApiResponse<CategoryDto?>(403, "Доступ к категории запрещен");
+                return new ApiResponse<CategoryResponceDto?>(403, "Доступ к категории запрещен");
 
             var category = await _categoryRepository.GetCategoryById(userId, id, cancellationToken);
             if (category == null)
-                return new ApiResponse<CategoryDto?>(404, "Категория не найдена");
+                return new ApiResponse<CategoryResponceDto?>(404, "Категория не найдена");
 
-            var categoryDto = category.Adapt<CategoryDto>();
+            var categoryDto = category.Adapt<CategoryResponceDto>();
 
-            return new ApiResponse<CategoryDto?>(200, categoryDto, "Категория успешно получена!");
+            return new ApiResponse<CategoryResponceDto?>(200, categoryDto, "Категория успешно получена!");
         }
         catch (Exception ex)
         {
-            return new ApiResponse<CategoryDto?>(500, $"Ошибка при получении категории: {ex.Message}");
+            return new ApiResponse<CategoryResponceDto?>(500, $"Ошибка при получении категории: {ex.Message}");
         }
     }
 
-    public async Task<ApiResponse<CategoryDto>> CreateCategory(Guid userId, CategoryDto categoryDto, CancellationToken cancellationToken)
+    public async Task<ApiResponse<CategoryResponceDto>> CreateCategory(Guid userId, CategoryRequestDto categoryDto, CancellationToken cancellationToken)
     {
         try
         {
             if (categoryDto == null)
-                return new ApiResponse<CategoryDto>(400, "Данные категории не предоставлены!");
+                return new ApiResponse<CategoryResponceDto>(400, "Данные категории не предоставлены!");
             if(userId == Guid.Empty)
-                return new ApiResponse<CategoryDto>(400, "Id пользователя не может быть пустым!");
+                return new ApiResponse<CategoryResponceDto>(400, "Id пользователя не может быть пустым!");
 
             // Проверяем, существует ли уже такая категория
             var existingCategory = await _categoryRepository.GetCategoryByNameAndTypeAsync(
@@ -81,14 +81,14 @@ public class CategoryService(
 
                 if (userCategory != null && userCategory.IsActive)
                 {
-                    return new ApiResponse<CategoryDto>(400, null, "Категория уже существует у пользователя");
+                    return new ApiResponse<CategoryResponceDto>(400, null, "Категория уже существует у пользователя");
                 }
 
                 // Активируем или создаем связь
                 await _userCategoryRepository.AddOrActivateUserCategoryAsync(userId, existingCategory.Id, cancellationToken);
 
-                var resultDto = existingCategory.Adapt<CategoryDto>();
-                return new ApiResponse<CategoryDto>(200, resultDto, "Категория успешно добавлена пользователю!");
+                var resultDto = existingCategory.Adapt<CategoryResponceDto>();
+                return new ApiResponse<CategoryResponceDto>(200, resultDto, "Категория успешно добавлена пользователю!");
             }
 
             // Создаем новую категорию
@@ -99,7 +99,7 @@ public class CategoryService(
             {
                 var savedFile = await _fileService.SaveAsync(categoryDto.ImageURL);
                 if (savedFile == null)
-                    return new ApiResponse<CategoryDto>(400, "Ошибка при сохранении файла изображения пользователя.");
+                    return new ApiResponse<CategoryResponceDto>(400, "Ошибка при сохранении файла изображения пользователя.");
                 category.Image = new CategoryFile()
                 {
                     CategoryId = category.Id,
@@ -112,36 +112,36 @@ public class CategoryService(
 
             var createdCategory = await _categoryRepository.CreateCategory(userId, category, cancellationToken);
             if (createdCategory == null)
-                return new ApiResponse<CategoryDto>(500, null, "Ошибка при создании категории");
+                return new ApiResponse<CategoryResponceDto>(500, null, "Ошибка при создании категории");
 
             // Связываем категорию с пользователем
             await _userCategoryRepository.AddOrActivateUserCategoryAsync(userId, createdCategory.Id, cancellationToken);
 
-            var createdDto = createdCategory.Adapt<CategoryDto>();
-            return new ApiResponse<CategoryDto>(201, createdDto, "Категория успешно создана!");
+            var createdDto = createdCategory.Adapt<CategoryResponceDto>();
+            return new ApiResponse<CategoryResponceDto>(201, createdDto, "Категория успешно создана!");
         }
         catch (Exception ex)
         {
-            return new ApiResponse<CategoryDto>(500, null, $"Ошибка при создании категории: {ex.Message}");
+            return new ApiResponse<CategoryResponceDto>(500, null, $"Ошибка при создании категории: {ex.Message}");
         }
     }
 
-    public async Task<ApiResponse<CategoryDto?>> UpdateCategory(Guid userId, Guid id, CategoryDto categoryDto, CancellationToken cancellationToken)
+    public async Task<ApiResponse<CategoryResponceDto?>> UpdateCategory(Guid userId, Guid id, CategoryRequestDto categoryDto, CancellationToken cancellationToken)
     {
         try
         {
             if (id == Guid.Empty)
-                return new ApiResponse<CategoryDto?>(400, null, "Id не может быть пустым!");
+                return new ApiResponse<CategoryResponceDto?>(400, null, "Id не может быть пустым!");
 
             // Получаем существующую категорию
             var existingCategory = await _categoryRepository.GetCategoryById(userId, id, cancellationToken);
             if (existingCategory == null)
-                return new ApiResponse<CategoryDto?>(404, null, "Категория не найдена");
+                return new ApiResponse<CategoryResponceDto?>(404, null, "Категория не найдена");
 
             // Проверяем права доступа
             var userCategory = await _userCategoryRepository.GetUserCategoryAsync(userId, id, cancellationToken);
             if (userCategory == null || !userCategory.IsActive)
-                return new ApiResponse<CategoryDto?>(403, null, "Доступ к категории запрещен");
+                return new ApiResponse<CategoryResponceDto?>(403, null, "Доступ к категории запрещен");
 
             // Проверка на дубликаты
             if (existingCategory.Name != categoryDto.Name || existingCategory.Type != categoryDto.Type)
@@ -151,7 +151,7 @@ public class CategoryService(
 
                 if (duplicateExists)
                 {
-                    return new ApiResponse<CategoryDto?>(400, null, "Категория с таким именем и типом уже существует");
+                    return new ApiResponse<CategoryResponceDto?>(400, null, "Категория с таким именем и типом уже существует");
                 }
             }
 
@@ -161,12 +161,12 @@ public class CategoryService(
 
             var updatedCategory = await _categoryRepository.UpdateCategory(userId, id, existingCategory, cancellationToken);
 
-            var resultDto = updatedCategory.Adapt<CategoryDto>();
-            return new ApiResponse<CategoryDto?>(200, resultDto, "Категория успешно обновлена!");
+            var resultDto = updatedCategory.Adapt<CategoryResponceDto>();
+            return new ApiResponse<CategoryResponceDto?>(200, resultDto, "Категория успешно обновлена!");
         }
         catch (Exception ex)
         {
-            return new ApiResponse<CategoryDto?>(500, null, $"Ошибка при обновлении категории: {ex.Message}");
+            return new ApiResponse<CategoryResponceDto?>(500, null, $"Ошибка при обновлении категории: {ex.Message}");
         }
     }
 

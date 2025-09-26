@@ -1,6 +1,7 @@
 ﻿using Application.DTOs;
 using Application.DTOs.Requests;
 using Application.DTOs.Responses;
+using Application.Exceptions;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Domain.Models;
@@ -13,8 +14,9 @@ public class UserService(IUserRepository _userRepository, IJWTService _jwtServic
     public async Task<ApiResponse<AuthResultDto>> AuthenticateAsync(string username, string password)
     {
         var user = await _userRepository.GetByUsernameAsync(username);
-        if (user == null || !user.IsActive)
-            return new ApiResponse<AuthResultDto>(400, "Пользователь не найден или заблокирован!");
+        if (user == null || !user.IsActive) 
+            throw new NotFoundException("Пользователь не найден или заблокирован.");
+        // return new ApiResponse<AuthResultDto>(400, "Пользователь не найден или заблокирован!");
 
         if (!BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
             return new ApiResponse<AuthResultDto>(401, "Неверный пароль!");
@@ -88,7 +90,32 @@ public class UserService(IUserRepository _userRepository, IJWTService _jwtServic
         if (_userId == Guid.Empty)
             return new ApiResponse<UserResponseDto>(400, "Некорректный идентификатор пользователя.");
 
-        var updatedUser = (await _userRepository.UpdateAsync(_userId, userRequestsDto, cancellationToken)).Adapt<UserResponseDto>();
+        if (userRequestsDto == null)
+            return new ApiResponse<UserResponseDto>(400, "Данные пользователя не предоставлены.");
+
+        if (string.IsNullOrWhiteSpace(userRequestsDto.UserName))
+            return new ApiResponse<UserResponseDto>(400, "Имя пользователя не может быть пустым.");
+
+        userRequestsDto.PasswordHash = BCrypt.Net.BCrypt.HashPassword(userRequestsDto.PasswordHash);
+
+        var user = userRequestsDto.Adapt<User>();
+
+        if (userRequestsDto.ImageURL != null)
+        {
+            var savedFile = await _fileService.SaveAsync(userRequestsDto.ImageURL);
+            if (savedFile == null)
+                return new ApiResponse<UserResponseDto>(400, "Ошибка при сохранении файла изображения пользователя.");
+            user.Image = new UserFile()
+            {
+                UserId = user.Id,
+                Name = savedFile.Name,
+                Url = savedFile.Url,
+                Size = savedFile.Size,
+                Extension = savedFile.Extension
+            };
+        }
+
+        var updatedUser = (await _userRepository.UpdateAsync(_userId, user, cancellationToken)).Adapt<UserResponseDto>();
 
         //if (updatedUser == null)
         //    throw new InvalidOperationException("Пользователь не найден или не обновлен.");

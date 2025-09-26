@@ -1,12 +1,11 @@
 ﻿using Domain.Enums;
-using Microsoft.AspNetCore.Http;
 
-namespace Application.DTOs
+namespace Application.DTOs.Responses
 {
-    public class CategoryDto
+    public class CategoryResponceDto
     {
         public required string Name { get; set; }
         public CategoryTypeEnum Type { get; set; } // income or expense
-        public IFormFile? ImageURL { get; set; }
+        public string? ImageURL { get; set; }
     }
 }
