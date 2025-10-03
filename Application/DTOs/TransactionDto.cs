@@ -2,9 +2,9 @@
 {
     public class TransactionDto
     {
-        public Guid UserCategoryId { get; set; }
+        public Guid CategoryId { get; set; }
         public decimal Amount { get; set; }
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
-        public string? Note { get; set; }
+        public string? Description { get; set; }
     }
 }

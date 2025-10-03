@@ -10,15 +10,12 @@ namespace Presentation.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class AuthController(IUserService _userService) : ApiBaseController
+public class AuthController(IUserService userService) : ApiBaseController
 {
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest_ request)
     {
-        var token = await _userService.AuthenticateAsync(request.Username, request.Password);
-
-        if (token == null)
-            return Unauthorized();
+        var token = await userService.AuthenticateAsync(request.Username, request.Password);
 
         return Ok(token);
     }
@@ -26,7 +23,7 @@ public class AuthController(IUserService _userService) : ApiBaseController
     [HttpPost("register/user")]
     public async Task<IActionResult> RegisterUser([FromForm] UserRequestsDto request, CancellationToken cancellationToken)
     {
-        var success = await _userService.RegisterUserAsync(request, cancellationToken);
+        var success = await userService.RegisterUserAsync(request, cancellationToken);
 
         return Ok(success);
     }
@@ -35,10 +32,7 @@ public class AuthController(IUserService _userService) : ApiBaseController
     [HttpGet]
     public async Task<IActionResult> GetUserByIdAsync(CancellationToken cancellationToken)
     {
-        if (UserUid is null || UserUid.Value == Guid.Empty)
-            return BadRequest("UserUid не определён.");
-
-        var result = await _userService.GetUserById(UserUid.Value, cancellationToken);
+        var result = await userService.GetUserById(GetUserId(), cancellationToken);
 
         return Ok(result);
     }
@@ -47,10 +41,7 @@ public class AuthController(IUserService _userService) : ApiBaseController
     [HttpPut]
     public async Task<IActionResult> UpdateUser([FromForm] UserRequestsDto userDto, CancellationToken cancellationToken)
     {
-        if (UserUid is null || UserUid.Value == Guid.Empty)
-            return BadRequest("UserUid не определён.");
-
-        var result = await _userService.UpdateUserById(UserUid.Value, userDto, cancellationToken);
+        var result = await userService.UpdateUserById(GetUserId(), userDto, cancellationToken);
 
         return Ok(result);
     }
@@ -59,11 +50,9 @@ public class AuthController(IUserService _userService) : ApiBaseController
     [HttpDelete]
     public async Task<IActionResult> DeleteUser(CancellationToken cancellationToken)
     {
-        if (UserUid is null || UserUid.Value == Guid.Empty)
-            return BadRequest("UserUid не определён.");
-
-        var result = await _userService.DeleteUser(UserUid.Value, cancellationToken);
+        var result = await userService.DeleteUser(GetUserId(), cancellationToken);
 
         return Ok(result);
     }
+
 }

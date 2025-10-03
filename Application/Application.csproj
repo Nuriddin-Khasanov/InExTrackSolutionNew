@@ -7,6 +7,12 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <Compile Remove="DTOs\UserCategoryDto.cs" />
+      <Compile Remove="Interfaces\Repositories\IUserCategoryRepository.cs" />
+      <Compile Remove="Interfaces\Services\IUserCategoryService.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
       <ProjectReference Include="..\Domain\Domain.csproj" />
     </ItemGroup>
 

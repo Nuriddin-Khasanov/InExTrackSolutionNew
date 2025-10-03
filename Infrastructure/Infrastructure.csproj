@@ -7,6 +7,10 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <Compile Remove="Repositories\UserCategoryRepository.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
       <ProjectReference Include="..\Application\Application.csproj" />
     </ItemGroup>
 

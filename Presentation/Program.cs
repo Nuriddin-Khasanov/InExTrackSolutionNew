@@ -37,14 +37,14 @@ builder.Services.AddSwaggerGen(c =>
     c.UseAllOfForInheritance();
     c.UseOneOfForPolymorphism();
 
-    // Чтобы enum в Swagger UI показывались строками
+    // ????? enum ? Swagger UI ???????????? ????????
     /*
     c.SchemaGeneratorOptions = new SchemaGeneratorOptions
     {
         DescribeAllEnumsAsStrings = true
     };
     */
-    // Вместо этого, чтобы отображать enum как строки в Swagger, используйте следующий фильтр:
+    // ?????? ?????, ????? ?????????? enum ??? ?????? ? Swagger, ??????????? ????????? ??????:
     c.MapType<Enum>(() => new OpenApiSchema
     {
         Type = "string",
@@ -55,7 +55,7 @@ builder.Services.AddSwaggerGen(c =>
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 
-builder.Services.AddDbContext<AppDBContext>(options =>
+builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddAuthentication(
         options => {
@@ -84,10 +84,10 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
-builder.Services.AddScoped<IUserCategoryRepository, UserCategoryRepository>();
 builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
 builder.Services.AddScoped<ITransactionService, TransactionService>();
 builder.Services.AddScoped<IFileService, FileService>();
+
 
 builder.Services.AddSwaggerGen(options =>
 {

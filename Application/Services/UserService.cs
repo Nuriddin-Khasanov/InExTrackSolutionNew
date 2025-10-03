@@ -9,11 +9,11 @@ using Mapster;
 
 namespace Application.Services;
 
-public class UserService(IUserRepository _userRepository, IJWTService _jwtService, IFileService _fileService) : IUserService
+public class UserService(IUserRepository userRepository, IJWTService jwtService, IFileService fileService) : IUserService
 {
     public async Task<ApiResponse<AuthResultDto>> AuthenticateAsync(string username, string password)
     {
-        var user = await _userRepository.GetByUsernameAsync(username);
+        var user = await userRepository.GetByUsernameAsync(username);
         if (user == null || !user.IsActive) 
             throw new NotFoundException("Пользователь не найден или заблокирован.");
         // return new ApiResponse<AuthResultDto>(400, "Пользователь не найден или заблокирован!");
@@ -21,25 +21,25 @@ public class UserService(IUserRepository _userRepository, IJWTService _jwtServic
         if (!BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
             return new ApiResponse<AuthResultDto>(401, "Неверный пароль!");
 
-        var token = _jwtService.GenerateToken(user);
+        var token = jwtService.GenerateToken(user);
 
-        var _userResponseDto = user.Adapt<UserResponseDto>();
+        var userResponseDto = user.Adapt<UserResponseDto>();
 
         var result = new AuthResultDto
         {
-            UserResponseDto = _userResponseDto,
+            UserResponseDto = userResponseDto,
             Token = token
         };
 
         return new ApiResponse<AuthResultDto>(200, result, "Успешный вход");
     }
 
-    public async Task<ApiResponse<UserResponseDto>> GetUserById(Guid _userId, CancellationToken cancellationToken)
+    public async Task<ApiResponse<UserResponseDto>> GetUserById(Guid userId, CancellationToken cancellationToken)
     {
-        if (_userId == Guid.Empty)
+        if (userId == Guid.Empty)
             return new ApiResponse<UserResponseDto>(400, "Некорректный идентификатор пользователя.");
 
-        var user = await _userRepository.GetByIdAsync(_userId, cancellationToken);
+        var user = await userRepository.GetByIdAsync(userId, cancellationToken);
         var userDto = user.Adapt<UserResponseDto>();
         // .ContinueWith(t => t.Result.Adapt<UserResponseDto>(), cancellationToken);
 
@@ -49,7 +49,7 @@ public class UserService(IUserRepository _userRepository, IJWTService _jwtServic
         return new ApiResponse<UserResponseDto>(200, userDto, "Пользователь успешно получен!");
     }
 
-    public async Task<ApiResponse<bool>> RegisterUserAsync(UserRequestsDto _user, CancellationToken cancellationToken)
+    public async Task<ApiResponse<bool>> RegisterUserAsync(UserRequestsDto? _user, CancellationToken cancellationToken)
     {
         if (_user == null)
             return new ApiResponse<bool>(400, "Данные пользователя не предоставлены.");
@@ -57,7 +57,7 @@ public class UserService(IUserRepository _userRepository, IJWTService _jwtServic
         if (string.IsNullOrWhiteSpace(_user.UserName))
             return new ApiResponse<bool>(400, "Имя пользователя не может быть пустым.");
 
-        if (await _userRepository.ExistsAsync(_user.UserName, _user.Email, _user.PhoneNumber, cancellationToken))
+        if (await userRepository.ExistsAsync(_user.UserName, _user.Email, _user.PhoneNumber, cancellationToken))
             return new ApiResponse<bool>(400, "Пользователь уже существует, попробуйте изменить имя, Email или номер телефона!");
 
         _user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(_user.PasswordHash);
@@ -66,7 +66,7 @@ public class UserService(IUserRepository _userRepository, IJWTService _jwtServic
 
         if (_user.ImageURL != null)
         {
-            var savedFile = await _fileService.SaveAsync(_user.ImageURL);
+            var savedFile = await fileService.SaveAsync(_user.ImageURL);
             if(savedFile == null)
                 return new ApiResponse<bool>(400, "Ошибка при сохранении файла изображения пользователя.");
             user.Image = new UserFile()
@@ -80,47 +80,52 @@ public class UserService(IUserRepository _userRepository, IJWTService _jwtServic
         }
 
         // Сохраняем пользователя в БД
-        await _userRepository.AddAsync(user);
+        await userRepository.AddAsync(user);
 
         return new ApiResponse<bool>(201, true, "Пользователь успешно добавлен!");
     }
 
-    public async Task<ApiResponse<UserResponseDto>> UpdateUserById(Guid _userId, UserRequestsDto userRequestsDto, CancellationToken cancellationToken)
+    public async Task<ApiResponse<UserResponseDto>> UpdateUserById(Guid userId, UserRequestsDto? userRequestsDto, CancellationToken cancellationToken)
     {
-        if (_userId == Guid.Empty)
-            return new ApiResponse<UserResponseDto>(400, "Некорректный идентификатор пользователя.");
-
-        if (userRequestsDto == null)
-            return new ApiResponse<UserResponseDto>(400, "Данные пользователя не предоставлены.");
-
-        if (string.IsNullOrWhiteSpace(userRequestsDto.UserName))
-            return new ApiResponse<UserResponseDto>(400, "Имя пользователя не может быть пустым.");
-
-        userRequestsDto.PasswordHash = BCrypt.Net.BCrypt.HashPassword(userRequestsDto.PasswordHash);
-
-        var user = userRequestsDto.Adapt<User>();
-
-        if (userRequestsDto.ImageURL != null)
+        try
         {
-            var savedFile = await _fileService.SaveAsync(userRequestsDto.ImageURL);
-            if (savedFile == null)
-                return new ApiResponse<UserResponseDto>(400, "Ошибка при сохранении файла изображения пользователя.");
-            user.Image = new UserFile()
+            if (userRequestsDto == null)
+                return new ApiResponse<UserResponseDto>(400, "Данные пользователя не предоставлены.");
+
+            if (string.IsNullOrWhiteSpace(userRequestsDto.UserName))
+                return new ApiResponse<UserResponseDto>(400, "Имя пользователя не может быть пустым.");
+
+            userRequestsDto.PasswordHash = BCrypt.Net.BCrypt.HashPassword(userRequestsDto.PasswordHash);
+
+            var user = userRequestsDto.Adapt<User>();
+            user.Id = userId;
+
+            var userPicture = await userRepository.GetUserPicture(userId, cancellationToken);
+            if (!string.IsNullOrEmpty(userPicture))
+                await fileService.RemoveAsync(userPicture);
+
+            if (userRequestsDto.ImageURL != null)
             {
-                UserId = user.Id,
-                Name = savedFile.Name,
-                Url = savedFile.Url,
-                Size = savedFile.Size,
-                Extension = savedFile.Extension
-            };
+                var savedFile = await fileService.SaveAsync(userRequestsDto.ImageURL);
+                if (savedFile == null)
+                    return new ApiResponse<UserResponseDto>(400, "Ошибка при сохранении файла изображения пользователя.");
+                user.Image = new UserFile()
+                {
+                    UserId = user.Id,
+                    Name = savedFile.Name,
+                    Url = savedFile.Url,
+                    Size = savedFile.Size,
+                    Extension = savedFile.Extension
+                };
+            }
+
+            var updatedUser = (await userRepository.UpdateAsync(userId, user, cancellationToken)).Adapt<UserResponseDto>();
+            return new ApiResponse<UserResponseDto>(200, updatedUser, "Пользователь успешно обновлен!");
         }
-
-        var updatedUser = (await _userRepository.UpdateAsync(_userId, user, cancellationToken)).Adapt<UserResponseDto>();
-
-        //if (updatedUser == null)
-        //    throw new InvalidOperationException("Пользователь не найден или не обновлен.");
-
-        return new ApiResponse<UserResponseDto>(200, updatedUser, "Пользователь успешно обновлен!");
+        catch (Exception ex)
+        {
+            return new ApiResponse<UserResponseDto>(500, $"Произошла ошибка при обновлении пользователя: {ex.Message}");
+        }
     }
 
     public async Task<ApiResponse<bool>> DeleteUser(Guid id, CancellationToken cancellationToken)
@@ -128,26 +133,10 @@ public class UserService(IUserRepository _userRepository, IJWTService _jwtServic
         if (id == Guid.Empty)
             return new ApiResponse<bool>(400, "Некорректный идентификатор пользователя.");
 
-        if (await _userRepository.DeleteAsync(id, cancellationToken))
+        if (await userRepository.DeleteAsync(id, cancellationToken))
             return new ApiResponse<bool>(204, true, "Пользователь успешно удален.");
         
         return new ApiResponse<bool>(400, "Пользователь не найден или заблокирован.");
     }
-
-
-    //public async Task<bool> RegisterUserAsync(string username, string password)
-    //{
-    //    if (await _userRepository.ExistsAsync(username))
-    //        return false;
-
-    //    var user = new User
-    //    {
-    //        UserName = username,
-    //        PasswordHash = BCrypt.Net.BCrypt.HashPassword(password)
-    //    };
-
-    //    await _userRepository.AddAsync(user);
-    //    return true;
-    //}
 
 }
