@@ -1,8 +1,6 @@
-﻿using Application.DTOs.Requests;
-using Application.Interfaces.Repositories;
+﻿using Application.Interfaces.Repositories;
 using Domain.Models;
 using Infrastructure.DataContext;
-using Mapster;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories;
@@ -37,7 +35,7 @@ public class UserRepository(AppDbContext context) : IUserRepository
             .Include(u => u.Image)
             .FirstOrDefaultAsync(u => u.Id == userId, cancellationToken);
 
-        if (user == null)
+        if (user == null || !user.IsActive)
             return null;
 
         user.UserName = updatedUser.UserName;
@@ -47,13 +45,13 @@ public class UserRepository(AppDbContext context) : IUserRepository
         user.PasswordHash = updatedUser.PasswordHash;
         user.UpdatedDate = DateTime.UtcNow;
 
-        // Обновляем картинку
+        // работа с изображением
         if (updatedUser.Image != null)
         {
             if (user.Image == null)
             {
-                // если у пользователя ещё нет изображения — создаём новое
-                user.Image = new UserFile
+                // добавляем новое фото
+                var newImage = new UserFile
                 {
                     UserId = user.Id,
                     Name = updatedUser.Image.Name,
@@ -61,10 +59,13 @@ public class UserRepository(AppDbContext context) : IUserRepository
                     Extension = updatedUser.Image.Extension,
                     Size = updatedUser.Image.Size
                 };
+
+                context.UserFiles.Add(newImage);
+                user.Image = newImage;
             }
             else
             {
-                // если картинка уже есть — обновляем поля
+                // обновляем существующее фото
                 user.Image.Name = updatedUser.Image.Name;
                 user.Image.Url = updatedUser.Image.Url;
                 user.Image.Extension = updatedUser.Image.Extension;
@@ -73,7 +74,7 @@ public class UserRepository(AppDbContext context) : IUserRepository
         }
         else if (user.Image != null && updatedUser.Image == null)
         {
-            // если в обновлении нет картинки, а у пользователя она есть — удаляем её
+            // удаляем фото, если в обновлении его нет
             context.UserFiles.Remove(user.Image);
             user.Image = null;
         }

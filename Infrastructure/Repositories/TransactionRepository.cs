@@ -1,4 +1,5 @@
 ﻿using Application.DTOs;
+using Application.DTOs.Requests;
 using Application.Interfaces.Repositories;
 using Domain.Models;
 using Infrastructure.DataContext;
@@ -37,7 +38,7 @@ public class TransactionRepository(AppDbContext context) : ITransactionRepositor
         return transaction;
     }
 
-    public async Task<Transaction_> UpdateTransactionAsync(Guid id, TransactionDto transactionDto, CancellationToken cancellationToken = default)
+    public async Task<Transaction_> UpdateTransactionAsync(Guid id, Transaction_ transactionDto, CancellationToken cancellationToken = default)
     {
         var existingTransaction = await context.Transactions
             .Include(t => t.User)
@@ -47,7 +48,7 @@ public class TransactionRepository(AppDbContext context) : ITransactionRepositor
 
         transactionDto.Adapt(existingTransaction);
 
-        //_context.Transactions.Update(existingTransaction);
+        context.Transactions.Update(existingTransaction);
 
         await context.SaveChangesAsync(cancellationToken);
         return existingTransaction;

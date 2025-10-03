@@ -1,4 +1,5 @@
-﻿using Application.Interfaces.Repositories;
+﻿using Application.DTOs.Requests;
+using Application.Interfaces.Repositories;
 using Domain.Enums;
 using Domain.Models;
 using Infrastructure.DataContext;
@@ -9,11 +10,16 @@ namespace Infrastructure.Repositories;
 
 public class CategoryRepository(AppDbContext context) : ICategoryRepository
 {
-    public async Task<bool> CategoryExistsAsync(string name, CategoryTypeEnum type, CancellationToken cancellationToken = default)
+    public async Task<bool> CategoryExistsAsync(Guid userId, CategoryRequestDto categoryDto, CancellationToken cancellationToken = default)
     {
         return await context.Categories
             .Include(c => c.Image)
-            .AnyAsync(c => c.Name == name && c.Type == type, cancellationToken);
+            .AnyAsync(
+                c => c.UserId == userId 
+                && c.Name == categoryDto.Name 
+                && c.Type == categoryDto.Type 
+                && c.Description == categoryDto.Description, 
+                cancellationToken);
     }
 
     public async Task<Category?> GetCategoryByNameAndTypeAsync(Guid userId, string name, CategoryTypeEnum type, CancellationToken cancellationToken = default)
@@ -69,8 +75,11 @@ public class CategoryRepository(AppDbContext context) : ICategoryRepository
         if (category == null || !category.IsActive)
             return null;
 
-        updatedCategory.Adapt(category);
         category.Id = id;
+       // category.UserId = updatedCategory.UserId;
+        category.Name = updatedCategory.Name;
+        category.Type = updatedCategory.Type;
+        category.Description = updatedCategory.Description;
         category.UpdatedDate = DateTime.UtcNow;
 
         // Если есть изображение
@@ -78,7 +87,7 @@ public class CategoryRepository(AppDbContext context) : ICategoryRepository
         {
             if (category.Image == null)
             {
-                category.Image = new CategoryFile 
+                var newImage = new CategoryFile 
                 { 
                     CategoryId = category.Id,
                     Name = updatedCategory.Image.Name,
@@ -86,6 +95,9 @@ public class CategoryRepository(AppDbContext context) : ICategoryRepository
                     Extension = updatedCategory.Image.Extension,
                     Size = updatedCategory.Image.Size
                 };
+
+                context.CategotyFiles.Add(newImage);
+                category.Image = newImage;
             }
             else
             {

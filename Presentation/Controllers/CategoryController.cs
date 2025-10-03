@@ -33,7 +33,7 @@ public class CategoryController(ICategoryService categoryService) : ApiBaseContr
     [HttpPut]
     public async Task<IActionResult> UpdateCategory([FromForm] Guid id, CategoryRequestDto updatedCategory, CancellationToken cancellationToken)
     {
-        return Ok(await categoryService.UpdateCategory(id, updatedCategory, cancellationToken));
+        return Ok(await categoryService.UpdateCategory(GetUserId(), id, updatedCategory, cancellationToken));
     }
 
     [HttpDelete("{id:guid}")]

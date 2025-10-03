@@ -118,7 +118,7 @@ public class CategoryService(
         }
     }
 
-    public async Task<ApiResponse<CategoryResponceDto?>> UpdateCategory(Guid id, CategoryRequestDto categoryDto, CancellationToken cancellationToken)
+    public async Task<ApiResponse<CategoryResponceDto?>> UpdateCategory(Guid userId, Guid id, CategoryRequestDto categoryDto, CancellationToken cancellationToken)
     {
         try
         {
@@ -131,19 +131,22 @@ public class CategoryService(
             if (existingCategory == null)
                 return new ApiResponse<CategoryResponceDto?>(404, "Категория не найдена");
 
-            if (existingCategory.Name == categoryDto.Name && existingCategory.Type == categoryDto.Type)
+            if (existingCategory.Name == categoryDto.Name 
+                && existingCategory.Type == categoryDto.Type 
+                && existingCategory.Description == categoryDto.Description
+                && ((existingCategory.Image?.Url ?? string.Empty) == (categoryDto.ImageURL?.ToString() ?? string.Empty)))
                 return new ApiResponse<CategoryResponceDto?>(400, "Вы не изменили категории!");
 
             // Проверка на дубликаты
             var duplicateExists = await categoryRepository.CategoryExistsAsync(
-                categoryDto.Name ?? "", categoryDto.Type, cancellationToken);
+                userId, categoryDto, cancellationToken);
 
             if (duplicateExists)
                 return new ApiResponse<CategoryResponceDto?>(400, "Категория с таким именем и типом уже существует");
 
             // Частичное обновление с помощью AutoMapper
-            categoryDto.Adapt(existingCategory);
-            existingCategory.Id = id;
+            var categoryAdapt = categoryDto.Adapt<Category>();
+            categoryAdapt.Id = id;
 
             var categoryPicture = await categoryRepository.GetCategoryPicture(id, cancellationToken);
             if(!string.IsNullOrWhiteSpace(categoryPicture))
@@ -154,9 +157,9 @@ public class CategoryService(
                 var savedFile = await fileService.SaveAsync(categoryDto.ImageURL);
                 if (savedFile == null)
                     return new ApiResponse<CategoryResponceDto?>(400, "Ошибка при сохранении файла изображения категории.");
-                existingCategory.Image = new CategoryFile()
+                categoryAdapt.Image = new CategoryFile()
                 {
-                    CategoryId = existingCategory.Id,
+                    CategoryId = categoryAdapt.Id,
                     Name = savedFile.Name,
                     Url = savedFile.Url,
                     Size = savedFile.Size,
@@ -164,9 +167,10 @@ public class CategoryService(
                 };
             }
 
-            var updatedCategory = await categoryRepository.UpdateCategory(id, existingCategory, cancellationToken);
+            var updatedCategory = await categoryRepository.UpdateCategory(id, categoryAdapt, cancellationToken);
 
             var resultDto = updatedCategory.Adapt<CategoryResponceDto>();
+
             return new ApiResponse<CategoryResponceDto?>(200, resultDto, "Категория успешно обновлена!");
         }
         catch (Exception ex)

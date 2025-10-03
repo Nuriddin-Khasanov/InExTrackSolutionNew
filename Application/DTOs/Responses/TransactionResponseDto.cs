@@ -1,7 +1,8 @@
-﻿namespace Application.DTOs
+﻿namespace Application.DTOs.Responses
 {
-    public class TransactionDto
+    public class TransactionResponseDto
     {
+        public Guid Id { get; set; }
         public Guid CategoryId { get; set; }
         public decimal Amount { get; set; }
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;

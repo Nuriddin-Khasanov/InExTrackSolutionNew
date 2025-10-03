@@ -1,4 +1,5 @@
 ﻿using Application.DTOs;
+using Application.DTOs.Requests;
 using Application.DTOs.Responses;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
@@ -10,47 +11,49 @@ namespace Application.Services;
 public class TransactionService(ITransactionRepository transactionRepository) : ITransactionService
 {
 
-    public async Task<ApiResponse<IEnumerable<TransactionDto>>> GetTransactionsAsync(Guid userId, CancellationToken cancellationToken = default)
+    public async Task<ApiResponse<IEnumerable<TransactionResponseDto>>> GetTransactionsAsync(Guid userId, CancellationToken cancellationToken = default)
     {
         var transactions = await transactionRepository.GetTransactionsAsync(userId, cancellationToken);
 
         if(!transactions.Any())
-            return new ApiResponse<IEnumerable<TransactionDto>>(404, "Транзакции не найдены!");
+            return new ApiResponse<IEnumerable<TransactionResponseDto>>(404, "Транзакции не найдены!");
 
-        var transactionDtos = transactions.Adapt<IEnumerable<TransactionDto>>();
+        var transactionDtos = transactions.Adapt<IEnumerable<TransactionResponseDto>>();
 
-        return new ApiResponse<IEnumerable<TransactionDto>>(200, transactionDtos, "Транзакции успешно получены!");
+        return new ApiResponse<IEnumerable<TransactionResponseDto>>(200, transactionDtos, "Транзакции успешно получены!");
     }
 
-    public async Task<ApiResponse<TransactionDto>> GetTransactionByIdAsync(Guid transactionId, CancellationToken cancellationToken = default)
+    public async Task<ApiResponse<TransactionResponseDto>> GetTransactionByIdAsync(Guid transactionId, CancellationToken cancellationToken = default)
     {
         var transaction = await transactionRepository.GetTransactionByIdAsync(transactionId, cancellationToken);
 
         if (transaction != null)
-            return new ApiResponse<TransactionDto>(404, "Транзакция не найдена!");
+            return new ApiResponse<TransactionResponseDto>(404, "Транзакция не найдена!");
 
-        var transactionDtos = transaction.Adapt<TransactionDto>();
+        var transactionDtos = transaction.Adapt<TransactionResponseDto>();
 
-        return new ApiResponse<TransactionDto>(200, transactionDtos, "Транзакция успешно получено!");
+        return new ApiResponse<TransactionResponseDto>(200, transactionDtos, "Транзакция успешно получено!");
     }
 
-    public async Task<ApiResponse<TransactionDto>> AddTransactionAsync(Guid userId, TransactionDto transactionDto, CancellationToken cancellationToken = default)
+    public async Task<ApiResponse<TransactionResponseDto>> AddTransactionAsync(Guid userId, TransactionRequestDto transactionDto, CancellationToken cancellationToken = default)
     {
         var transactionAdapt = transactionDto.Adapt<Transaction_>();
         transactionAdapt.UserId = userId;
 
         var transaction = await transactionRepository.AddTransactionAsync(transactionAdapt, cancellationToken);
 
-        var transactionDtos = transaction.Adapt<TransactionDto>();
-        return new ApiResponse<TransactionDto>(201, transactionDtos, "Транзакция успешно добавлено!");
+        var transactionDtos = transaction.Adapt<TransactionResponseDto>();
+        return new ApiResponse<TransactionResponseDto>(201, transactionDtos, "Транзакция успешно добавлено!");
     }
 
-    public async Task<ApiResponse<TransactionDto>> UpdateTransactionAsync(Guid id, TransactionDto transactionDto, CancellationToken cancellationToken = default)
+    public async Task<ApiResponse<TransactionResponseDto>> UpdateTransactionAsync(Guid id, TransactionRequestDto transactionDto, CancellationToken cancellationToken = default)
     {
-        var updatedTransaction = await transactionRepository.UpdateTransactionAsync(id, transactionDto, cancellationToken);
+        var transactionAdapt = transactionDto.Adapt<Transaction_>();
 
-        var transactionDtos = updatedTransaction.Adapt<TransactionDto>();
-        return new ApiResponse<TransactionDto>(200, transactionDtos, "Транзакция успешно изменено!");
+        var updatedTransaction = await transactionRepository.UpdateTransactionAsync(id, transactionAdapt, cancellationToken);
+
+        var transactionDtos = updatedTransaction.Adapt<TransactionResponseDto>();
+        return new ApiResponse<TransactionResponseDto>(200, transactionDtos, "Транзакция успешно изменено!");
     }
 
     public async Task<ApiResponse<bool>> DeleteTransactionAsync(Guid id, CancellationToken cancellationToken = default)
@@ -63,14 +66,14 @@ public class TransactionService(ITransactionRepository transactionRepository) : 
         return new ApiResponse<bool>(204, transactionDtos, "Транзакция успешно удалено!");
     }
 
-    public async Task<ApiResponse<IEnumerable<TransactionDto>>> GetTransactionsByFilterAsync(Guid userId, TransactionFilterDto transactionFilterDto, CancellationToken cancellationToken)
+    public async Task<ApiResponse<IEnumerable<TransactionResponseDto>>> GetTransactionsByFilterAsync(Guid userId, TransactionFilterDto transactionFilterDto, CancellationToken cancellationToken)
     {
         var result = await transactionRepository.GetTransactionsByFilterAsync(userId, transactionFilterDto, cancellationToken);
 
-        var transactionDtos = result.Adapt<IEnumerable<TransactionDto>>().ToList();
+        var transactionDtos = result.Adapt<IEnumerable<TransactionResponseDto>>().ToList();
         
         return transactionDtos.Count != 0 
-            ? new ApiResponse<IEnumerable<TransactionDto>>(200, transactionDtos, "Транзакция успешно получено!") 
-            : new ApiResponse<IEnumerable<TransactionDto>>(404, "Транзакция не найдено!");
+            ? new ApiResponse<IEnumerable<TransactionResponseDto>>(200, transactionDtos, "Транзакция успешно получено!") 
+            : new ApiResponse<IEnumerable<TransactionResponseDto>>(404, "Транзакция не найдено!");
     }
 }

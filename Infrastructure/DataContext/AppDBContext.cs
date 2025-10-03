@@ -20,14 +20,15 @@ public sealed class AppDbContext: DbContext
     {
         base.OnModelCreating(modelBuilder);
         // Additional configuration can go here
+
         modelBuilder.Entity<User>()
-        .HasOne(u => u.Image)
-        .WithOne(f => f.User)
-        .HasForeignKey<UserFile>(f => f.UserId);
+            .HasOne(u => u.Image)
+            .WithOne(f => f.User)
+            .HasForeignKey<UserFile>(f => f.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<Category>()
-       .Property(c => c.Type)
-       .HasConversion<int>(); // хранит как int (1 или 2)
-
+            .Property(c => c.Type)
+            .HasConversion<int>(); // хранит как int (1 или 2)
     }
 }

@@ -1,5 +1,4 @@
-﻿using Application.DTOs;
-using Application.DTOs.Requests;
+﻿using Application.DTOs.Requests;
 using Application.DTOs.Responses;
 using Domain.Models;
 using Mapster;
@@ -25,8 +24,8 @@ public class RegisterMapper : IRegister
         config.NewConfig<Category, CategoryRequestDto>();
         config.NewConfig<CategoryRequestDto, Category>();
 
-        config.NewConfig<TransactionDto, Transaction_>();
-        config.NewConfig<Transaction_, TransactionDto>();
+        config.NewConfig<TransactionResponseDto, Transaction_>();
+        config.NewConfig<Transaction_, TransactionResponseDto>();
 
 
     }

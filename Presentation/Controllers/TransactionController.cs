@@ -1,4 +1,5 @@
 ﻿using Application.DTOs;
+using Application.DTOs.Requests;
 using Application.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -35,7 +36,7 @@ public class TransactionController(ITransactionService transactionService) : Api
     }
 
     [HttpPost]
-    public async Task<IActionResult> AddTransaction([FromBody] TransactionDto transactionDto, CancellationToken cancellationToken)
+    public async Task<IActionResult> AddTransaction([FromBody] TransactionRequestDto transactionDto, CancellationToken cancellationToken)
     {
         var createdTransaction = await transactionService.AddTransactionAsync(GetUserId(), transactionDto, cancellationToken);
 
@@ -43,7 +44,7 @@ public class TransactionController(ITransactionService transactionService) : Api
     }
 
     [HttpPut("{id:guid}")]
-    public async Task<IActionResult> UpdateTransaction(Guid id, [FromBody] TransactionDto transactionDto, CancellationToken cancellationToken)
+    public async Task<IActionResult> UpdateTransaction(Guid id, [FromBody] TransactionRequestDto transactionDto, CancellationToken cancellationToken)
     {
         var updatedTransaction = await transactionService.UpdateTransactionAsync(id, transactionDto, cancellationToken);
 
